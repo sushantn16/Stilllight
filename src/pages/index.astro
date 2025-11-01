@@ -1,0 +1,113 @@
+---
+const YEAR = new Date().getFullYear();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Gallery</title>
+    <meta name="description" content="A fast, minimal photo gallery." />
+    <style>
+      :root { --gap:12px; --bg:#0b0b0c; --fg:#eee; --muted:#9a9aa0; }
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+      header{max-width:1100px;margin:0 auto;padding:28px 18px 8px}
+      header h1{margin:0 0 4px;font-size:1.25rem}
+      header p{margin:0;color:var(--muted)}
+      .grid{max-width:1100px;margin:16px auto 60px;padding:0 18px;display:grid;gap:var(--gap);
+            grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+      .card{position:relative;overflow:hidden;border-radius:14px}
+      .card img{width:100%;height:100%;object-fit:cover;display:block;background:#151518;aspect-ratio:4/3;transition:transform .25s ease}
+      .card:hover img{transform:scale(1.02)}
+      .caption{position:absolute;left:10px;bottom:10px;padding:4px 8px;border-radius:999px;font-size:.8rem;background:rgba(0,0,0,.45);backdrop-filter:blur(6px)}
+      dialog{width:92vw;max-width:1200px;border:0;padding:0;border-radius:16px;background:#000;color:#fff}
+      dialog::backdrop{background:rgba(0,0,0,.75)}
+      .x{position:absolute;top:8px;right:8px;border:0;background:rgba(0,0,0,.5);color:#fff;border-radius:10px;padding:6px 10px;cursor:pointer}
+      .lb{position:relative;display:grid;gap:10px;padding:10px}
+      footer{color:var(--muted);text-align:center;margin:30px 0 50px;font-size:.9rem}
+      .empty{max-width:1100px;margin:24px auto;color:#bbb;padding:0 18px}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Gallery</h1>
+      <p>Favorites. Minimal. Fast.</p>
+    </header>
+
+    <main id="app">
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" style="display:none">No photos yet.</p>
+    </main>
+
+    <dialog id="dlg">
+      <form method="dialog">
+        <button class="x" value="close" aria-label="Close">✕</button>
+        <div class="lb">
+          <img id="dlg-img" alt="" />
+          <div id="dlg-meta" style="color:#bdbdc4;font-size:.9rem"></div>
+        </div>
+      </form>
+    </dialog>
+
+    <footer>© {YEAR} Gallery</footer>
+
+    <script type="module">
+      const MANIFEST_URL = "https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev/manifest.json";
+      const grid = document.getElementById('grid');
+      const empty = document.getElementById('empty');
+      const dlg = document.getElementById('dlg');
+      const dlgImg = document.getElementById('dlg-img');
+      const dlgMeta = document.getElementById('dlg-meta');
+
+      async function load() {
+        try {
+          const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
+          if (!res.ok) throw new Error('manifest fetch failed');
+          const { items = [] } = await res.json();
+          if (!items.length) { empty.style.display = 'block'; return; }
+
+          const frag = document.createDocumentFragment();
+          for (const it of items) {
+            const a = document.createElement('a');
+            a.className = 'card';
+            a.href = it.full;
+            a.dataset.full = it.full;
+            a.setAttribute('aria-label', it.title || '');
+            a.innerHTML = `
+              <img loading="lazy" src="${it.thumb}"
+                   srcset="${it.thumb} 480w, ${it.full} 1600w"
+                   sizes="(max-width: 600px) 100vw, 33vw"
+                   alt="${it.title || ''}">
+              <span class="caption">${it.title || ''}</span>
+            `;
+            frag.appendChild(a);
+          }
+          grid.appendChild(frag);
+        } catch (e) {
+          empty.style.display = 'block';
+          empty.textContent = 'Could not load photos.';
+          console.error(e);
+        }
+      }
+
+      grid.addEventListener('click', e => {
+        const a = e.target.closest('a.card'); if (!a) return;
+        e.preventDefault();
+        dlgImg.src = a.dataset.full;
+        dlgImg.alt = a.getAttribute('aria-label') || '';
+        // optional simple EXIF preview if present in manifest
+        const meta = {}; // you can enrich this later
+        dlgMeta.textContent = '';
+        dlg.showModal();
+      });
+
+      dlg.addEventListener('click', e => {
+        const r = dlg.querySelector('form').getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+      });
+
+      load();
+    </script>
+  </body>
+</html>

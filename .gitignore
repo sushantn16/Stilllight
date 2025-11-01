@@ -1,0 +1,49 @@
+# ───────────────────────────────
+# Node & build system
+node_modules/
+dist/
+.cache/
+.DS_Store
+.env
+.env.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ───────────────────────────────
+# Astro build output
+/.astro/
+.output/
+.vercel/
+.cloudflare/
+.netlify/
+
+# ───────────────────────────────
+# Image pipeline
+originals/
+public/thumb/
+public/full/
+public/manifest.json
+tools/*.tmp
+tools/*.log
+
+# ───────────────────────────────
+# System / editor files
+*.swp
+*.swo
+Thumbs.db
+.idea/
+.vscode/
+*.code-workspace
+
+# ───────────────────────────────
+# OS specific
+Icon?
+ehthumbs.db
+desktop.ini
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
