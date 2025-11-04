@@ -9,6 +9,9 @@ const OUT_THUMB = "./public/thumb";
 const OUT_FULL  = "./public/full";
 const MANIFEST  = "./public/manifest.json";
 
+// R2 public URL - update this with your R2 bucket's public URL
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev";
+
 await mkdir(OUT_THUMB, { recursive: true });
 await mkdir(OUT_FULL, { recursive: true });
 
@@ -48,8 +51,8 @@ for (const f of files) {
   items.push({
     id: base,
     title: base.replace(/[-_]+/g, " "),
-    thumb: `thumb/${base}.jpg`,
-    full:  `full/${base}.jpg`,
+    thumb: `${R2_PUBLIC_URL}/thumb/${base}.jpg`,
+    full:  `${R2_PUBLIC_URL}/full/${base}.jpg`,
     exif
   });
 }
