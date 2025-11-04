@@ -1,5 +1,5 @@
 ---
-const YEAR = new Date().getFullYear();
+import '../styles/gallery.css';
 ---
 
 <html lang="en">
@@ -8,260 +8,6 @@ const YEAR = new Date().getFullYear();
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Stilllight</title>
     <meta name="description" content="A fast, minimal photo gallery." />
-    <style>
-      :root {
-        --gap:16px;
-        --bg:#0a0a0a;
-        --fg:#f5f5f5;
-        --muted:#999;
-        --card-bg:#1a1a1a;
-        --accent:#3b82f6;
-      }
-      *{box-sizing:border-box;margin:0;padding:0}
-      body{
-        margin:0;
-        background:var(--bg);
-        color:var(--fg);
-        font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
-        -webkit-font-smoothing:antialiased;
-        min-height:100vh;
-        display:flex;
-        flex-direction:column;
-      }
-
-      /* Header */
-      header{
-        max-width:1400px;
-        margin:0 auto;
-        padding:32px 24px 24px;
-        border-bottom:1px solid rgba(255,255,255,.08);
-      }
-      .header-content{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
-      .header-text h1{margin:0 0 8px;font-size:2rem;font-weight:700;letter-spacing:-.02em}
-      .header-text p{margin:0;color:var(--muted);font-size:1rem}
-
-      /* Loading state */
-      .loader{
-        max-width:1400px;
-        margin:60px auto;
-        padding:0 24px;
-        text-align:center;
-        color:var(--muted);
-      }
-      .spinner{
-        display:inline-block;
-        width:40px;
-        height:40px;
-        border:3px solid rgba(255,255,255,.1);
-        border-top-color:var(--accent);
-        border-radius:50%;
-        animation:spin 1s linear infinite;
-      }
-      @keyframes spin{to{transform:rotate(360deg)}}
-
-      /* Photo count */
-      .photo-count{
-        max-width:1400px;
-        margin:16px auto 0;
-        padding:0 24px;
-        color:var(--muted);
-        font-size:.9rem;
-      }
-
-      main{flex:1;}
-
-      /* Masonry Grid */
-      .grid{
-        max-width:1400px;
-        margin:24px auto 80px;
-        padding:0 24px;
-        column-count:4;
-        column-gap:var(--gap);
-      }
-      @media(max-width:1200px){.grid{column-count:3}}
-      @media(max-width:768px){.grid{column-count:2}}
-      @media(max-width:480px){.grid{column-count:1}}
-
-      .card{
-        position:relative;
-        break-inside:avoid;
-        margin-bottom:var(--gap);
-        background:var(--card-bg);
-        border-radius:16px;
-        overflow:hidden;
-        cursor:pointer;
-        transition:transform .2s ease,box-shadow .2s ease;
-      }
-      .card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
-      .card img{
-        width:100%;
-        height:auto;
-        display:block;
-        background:#0f0f0f;
-        transition:filter .3s ease,transform .3s ease,opacity .3s ease;
-      }
-      .card:hover img{
-        filter:blur(4px);
-        transform:scale(1.03);
-      }
-      .card-overlay{
-        position:absolute;
-        inset:0;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:6px;
-        padding:24px;
-        background:rgba(0,0,0,.55);
-        color:var(--fg);
-        text-align:center;
-        opacity:0;
-        pointer-events:none;
-        transition:opacity .2s ease;
-      }
-      .card-overlay p{
-        margin:0;
-        font-size:.9rem;
-        letter-spacing:.01em;
-      }
-      .card:hover .card-overlay{opacity:1}
-
-      /* Lightbox Dialog */
-      dialog{
-        width:95vw;
-        max-width:1400px;
-        max-height:95vh;
-        border:0;
-        padding:0;
-        border-radius:20px;
-        background:#0f0f0f;
-        color:#fff;
-        box-shadow:0 20px 60px rgba(0,0,0,.8);
-      }
-      dialog::backdrop{background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
-
-      .lb{
-        position:relative;
-        display:grid;
-        gap:0;
-        padding:0;
-        max-height:95vh;
-        overflow:hidden;
-      }
-      .lb-content{
-        display:grid;
-        grid-template-columns:1fr auto;
-        gap:0;
-        max-height:95vh;
-      }
-      @media(max-width:900px){.lb-content{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
-
-      .lb-image-container{
-        position:relative;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:#000;
-        overflow:hidden;
-        max-height:95vh;
-      }
-      .lb img{
-        max-width:100%;
-        max-height:95vh;
-        width:auto;
-        height:auto;
-        object-fit:contain;
-        display:block;
-      }
-
-      .lb-sidebar{
-        width:320px;
-        background:#0f0f0f;
-        border-left:1px solid rgba(255,255,255,.1);
-        padding:24px;
-        overflow-y:auto;
-        max-height:95vh;
-      }
-      @media(max-width:900px){
-        .lb-sidebar{
-          width:100%;
-          border-left:0;
-          border-top:1px solid rgba(255,255,255,.1);
-          max-height:40vh;
-        }
-      }
-
-      .lb-title{font-size:1.1rem;font-weight:600;margin-bottom:20px;word-break:break-word}
-      .meta-section{margin-bottom:24px}
-      .meta-section h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px;font-weight:600}
-      .meta-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9rem}
-      .meta-row:last-child{border-bottom:0}
-      .meta-label{color:var(--muted);flex-shrink:0;margin-right:16px}
-      .meta-value{text-align:right;word-break:break-word;color:var(--fg)}
-
-      /* Dialog controls */
-      .dlg-controls{
-        position:absolute;
-        top:16px;
-        right:16px;
-        z-index:10;
-        display:flex;
-        gap:8px;
-      }
-      .dlg-btn{
-        border:0;
-        background:rgba(0,0,0,.7);
-        color:#fff;
-        border-radius:12px;
-        padding:10px 14px;
-        cursor:pointer;
-        font-size:1.2rem;
-        transition:background .2s ease;
-        backdrop-filter:blur(10px);
-        -webkit-backdrop-filter:blur(10px);
-      }
-      .dlg-btn:hover{background:rgba(0,0,0,.9)}
-
-      .nav-btn{
-        position:absolute;
-        top:50%;
-        transform:translateY(-50%);
-        border:0;
-        background:rgba(0,0,0,.7);
-        color:#fff;
-        border-radius:12px;
-        padding:16px 12px;
-        cursor:pointer;
-        font-size:1.5rem;
-        transition:all .2s ease;
-        backdrop-filter:blur(10px);
-        -webkit-backdrop-filter:blur(10px);
-        z-index:10;
-      }
-      .nav-btn:hover{background:rgba(0,0,0,.9);transform:translateY(-50%) scale(1.1)}
-      .nav-btn:disabled{opacity:.3;cursor:not-allowed}
-      .nav-prev{left:16px}
-      .nav-next{right:16px}
-      @media(max-width:900px){
-        .nav-prev{left:340px}
-      }
-      @media(max-width:600px){
-        .nav-btn{padding:12px 10px;font-size:1.2rem}
-        .nav-prev{left:8px}
-        .nav-next{right:8px}
-      }
-
-      footer{
-        color:var(--muted);
-        text-align:center;
-        margin:40px 0 60px;
-        font-size:.9rem;
-        margin-top:auto;
-        padding:0 24px;
-      }
-      .empty{max-width:1400px;margin:60px auto;color:#bbb;padding:0 24px;text-align:center;font-size:1.1rem}
-    </style>
   </head>
   <body>
     <header>
@@ -273,50 +19,57 @@ const YEAR = new Date().getFullYear();
       </div>
     </header>
 
-    <div class="photo-count" id="photo-count"></div>
+    <div class="photo-count" id="photo-count" role="status" aria-live="polite"></div>
 
-    <main id="app">
-      <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <p style="margin-top:16px">Loading photos...</p>
+    <main id="app" aria-busy="true">
+      <div class="loader" id="loader" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading photos...</p>
       </div>
-      <div class="grid" id="grid"></div>
-      <p class="empty" id="empty" style="display:none">No photos yet.</p>
+      <div class="grid" id="grid" role="list"></div>
+      <p class="empty" id="empty" role="status">No photos yet.</p>
     </main>
 
-    <dialog id="dlg">
+    <dialog id="dlg" aria-modal="true" aria-labelledby="dlg-title">
       <div class="dlg-controls">
-        <button class="dlg-btn" id="close-btn" aria-label="Close">✕</button>
+        <button class="dlg-btn" id="close-btn" aria-label="Close lightbox">✕</button>
       </div>
       <div class="lb">
         <div class="lb-content">
           <div class="lb-image-container">
-            <button class="nav-btn nav-prev" id="prev-btn" aria-label="Previous">‹</button>
+            <button class="nav-btn nav-prev" id="prev-btn" aria-label="Previous photo">‹</button>
             <img id="dlg-img" alt="" />
-            <button class="nav-btn nav-next" id="next-btn" aria-label="Next">›</button>
+            <button class="nav-btn nav-next" id="next-btn" aria-label="Next photo">›</button>
           </div>
           <div class="lb-sidebar">
-            <div class="lb-title" id="dlg-title"></div>
+            <h2 class="lb-title" id="dlg-title"></h2>
             <div id="dlg-meta"></div>
           </div>
         </div>
       </div>
+      <div class="sr-only" id="dlg-status" role="status" aria-live="polite" aria-atomic="true"></div>
     </dialog>
 
-    <footer>© {YEAR} Stilllight</footer>
+    <footer>Stilllight</footer>
 
     <script is:inline>
+      // Configuration constants
       const MANIFEST_URL = "https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev/manifest.json";
+      const CACHE_DURATION_MS = 60000; // 1 minute cache busting
+      const FOCUS_DELAY_MS = 0; // Delay before focusing close button
+      const NAVIGATION_DEBOUNCE_MS = 100; // Debounce for keyboard navigation
 
       // Elements
       const grid = document.getElementById('grid');
       const empty = document.getElementById('empty');
       const loader = document.getElementById('loader');
       const photoCount = document.getElementById('photo-count');
+      const mainApp = document.getElementById('app');
       const dlg = document.getElementById('dlg');
       const dlgImg = document.getElementById('dlg-img');
       const dlgTitle = document.getElementById('dlg-title');
       const dlgMeta = document.getElementById('dlg-meta');
+      const dlgStatus = document.getElementById('dlg-status');
       const closeBtn = document.getElementById('close-btn');
       const prevBtn = document.getElementById('prev-btn');
       const nextBtn = document.getElementById('next-btn');
@@ -324,13 +77,53 @@ const YEAR = new Date().getFullYear();
       // State
       let allItems = [];
       let currentIndex = -1;
+      let lastFocusedElement = null;
+      const preloadedImages = new Map();
+      let navigationDebounceTimer = null;
+
+      // Preload adjacent images for faster navigation
+      function preloadImage(url) {
+        if (!url || preloadedImages.has(url)) return;
+
+        const img = new Image();
+        img.src = url;
+        preloadedImages.set(url, img);
+      }
+
+      function preloadAdjacentImages(index) {
+        if (index > 0 && allItems[index - 1]?.full) {
+          preloadImage(allItems[index - 1].full);
+        }
+        if (index < allItems.length - 1 && allItems[index + 1]?.full) {
+          preloadImage(allItems[index + 1].full);
+        }
+      }
+
+      // Parse EXIF date format (YYYY:MM:DD HH:MM:SS) to Date object
+      function parseExifDate(exifDateStr) {
+        if (!exifDateStr) return null;
+
+        // Try to parse EXIF format: "YYYY:MM:DD HH:MM:SS"
+        const exifMatch = exifDateStr.match(/^(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+        if (exifMatch) {
+          const [, year, month, day, hour, minute, second] = exifMatch;
+          return new Date(year, month - 1, day, hour, minute, second);
+        }
+
+        // Fallback to standard date parsing
+        const date = new Date(exifDateStr);
+        return isNaN(date.getTime()) ? null : date;
+      }
 
       // Format EXIF data
       function formatExifValue(key, value) {
         if (!value) return null;
         if (key === 'CreateDate' && value) {
-          const date = new Date(value);
-          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          const date = parseExifDate(value);
+          if (date) {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          }
+          return String(value).trim();
         }
         if (key === 'ExposureTime') {
           const numeric = Number(value);
@@ -354,24 +147,24 @@ const YEAR = new Date().getFullYear();
         const camera = [];
         if (item.exif.Make || item.exif.Model) {
           const cameraRows = [];
-          if (item.exif.Make) cameraRows.push(`<div class="meta-row"><span class="meta-label">Camera</span><span class="meta-value">${item.exif.Make}</span></div>`);
-          if (item.exif.Model) cameraRows.push(`<div class="meta-row"><span class="meta-label">Model</span><span class="meta-value">${item.exif.Model}</span></div>`);
-          if (item.exif.LensModel) cameraRows.push(`<div class="meta-row"><span class="meta-label">Lens</span><span class="meta-value">${item.exif.LensModel}</span></div>`);
+          if (item.exif.Make) cameraRows.push(`<div class="meta-row"><span class="meta-label">Camera</span><span class="meta-value">${escapeHtml(item.exif.Make)}</span></div>`);
+          if (item.exif.Model) cameraRows.push(`<div class="meta-row"><span class="meta-label">Model</span><span class="meta-value">${escapeHtml(item.exif.Model)}</span></div>`);
+          if (item.exif.LensModel) cameraRows.push(`<div class="meta-row"><span class="meta-label">Lens</span><span class="meta-value">${escapeHtml(item.exif.LensModel)}</span></div>`);
           camera.push(`<div class="meta-section"><h3>Camera</h3>${cameraRows.join('')}</div>`);
         }
 
         // Settings
         const settings = [];
         const settingRows = [];
-        if (item.exif.ISO) settingRows.push(`<div class="meta-row"><span class="meta-label">ISO</span><span class="meta-value">${formatExifValue('ISO', item.exif.ISO)}</span></div>`);
-        if (item.exif.FNumber) settingRows.push(`<div class="meta-row"><span class="meta-label">Aperture</span><span class="meta-value">${formatExifValue('FNumber', item.exif.FNumber)}</span></div>`);
-        if (item.exif.ExposureTime) settingRows.push(`<div class="meta-row"><span class="meta-label">Shutter</span><span class="meta-value">${formatExifValue('ExposureTime', item.exif.ExposureTime)}</span></div>`);
+        if (item.exif.ISO) settingRows.push(`<div class="meta-row"><span class="meta-label">ISO</span><span class="meta-value">${escapeHtml(formatExifValue('ISO', item.exif.ISO))}</span></div>`);
+        if (item.exif.FNumber) settingRows.push(`<div class="meta-row"><span class="meta-label">Aperture</span><span class="meta-value">${escapeHtml(formatExifValue('FNumber', item.exif.FNumber))}</span></div>`);
+        if (item.exif.ExposureTime) settingRows.push(`<div class="meta-row"><span class="meta-label">Shutter</span><span class="meta-value">${escapeHtml(formatExifValue('ExposureTime', item.exif.ExposureTime))}</span></div>`);
         if (settingRows.length) settings.push(`<div class="meta-section"><h3>Settings</h3>${settingRows.join('')}</div>`);
 
         // Date
         const dateSection = [];
         if (item.exif.CreateDate) {
-          dateSection.push(`<div class="meta-section"><h3>Date</h3><div class="meta-row"><span class="meta-label">Taken</span><span class="meta-value">${formatExifValue('CreateDate', item.exif.CreateDate)}</span></div></div>`);
+          dateSection.push(`<div class="meta-section"><h3>Date</h3><div class="meta-row"><span class="meta-label">Taken</span><span class="meta-value">${escapeHtml(formatExifValue('CreateDate', item.exif.CreateDate))}</span></div></div>`);
         }
 
         return [...camera, ...settings, ...dateSection].join('');
@@ -387,11 +180,12 @@ const YEAR = new Date().getFullYear();
           .replace(/'/g, '&#39;');
       }
 
-      function getDisplayTitle(item) {
+      function getDisplayTitle(item, includeIndex = false, index = 0) {
         const exif = item?.exif || {};
         const cameraParts = [exif.Make, exif.Model].filter(Boolean).join(' ');
         if (cameraParts) return cameraParts;
         if (exif.CreateDate) return formatExifValue('CreateDate', exif.CreateDate);
+        if (includeIndex) return `Photo ${index + 1}`;
         return '';
       }
 
@@ -419,78 +213,194 @@ const YEAR = new Date().getFullYear();
         grid.innerHTML = '';
 
         if (!items.length) {
-          empty.style.display = 'block';
+          empty.classList.add('visible');
           empty.textContent = 'No photos yet.';
           photoCount.textContent = '';
+          mainApp.setAttribute('aria-busy', 'false');
           return;
         }
 
-        empty.style.display = 'none';
-        photoCount.textContent = `${items.length} photo${items.length !== 1 ? 's' : ''}`;
+        empty.classList.remove('visible');
+        const countText = `${items.length} photo${items.length !== 1 ? 's' : ''}`;
+        photoCount.textContent = countText;
+        mainApp.setAttribute('aria-busy', 'false');
 
         const frag = document.createDocumentFragment();
         items.forEach((item, idx) => {
-          const title = getDisplayTitle(item);
+          // Skip invalid items
+          if (!item || !item.thumb || !item.full) return;
+
+          const title = getDisplayTitle(item, true, idx);
           const overlay = buildCardOverlay(item);
-          const safeAlt = escapeHtml(title || 'Photo');
+          const safeAlt = escapeHtml(title);
           const card = document.createElement('div');
           card.className = 'card';
+          card.setAttribute('role', 'listitem');
           card.dataset.index = idx;
           card.innerHTML = `
-            <img loading="lazy" src="${item.thumb}"
-                 srcset="${item.thumb} 480w, ${item.full} 1600w"
+            <img loading="lazy" src="${escapeHtml(item.thumb)}"
+                 srcset="${escapeHtml(item.thumb)} 480w, ${escapeHtml(item.full)} 1600w"
                  sizes="(max-width: 600px) 100vw, 300px"
                  alt="${safeAlt}">
             ${overlay}
           `;
+
+          // Handle image load/error states
+          const img = card.querySelector('img');
+          img.addEventListener('load', () => img.classList.add('loaded'));
+          img.addEventListener('error', () => {
+            img.classList.add('error');
+            img.alt = `${safeAlt} (failed to load)`;
+          });
+
           frag.appendChild(card);
         });
         grid.appendChild(frag);
       }
 
+      // Get all focusable elements in dialog
+      function getFocusableElements() {
+        return dlg.querySelectorAll(
+          'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+      }
+
+      // Trap focus inside dialog
+      function trapFocus(e) {
+        if (!dlg.open) return;
+
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              e.preventDefault();
+              lastElement.focus();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              e.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+      }
+
       // Open lightbox
       function openLightbox(index) {
+        // Bounds check
+        if (index < 0 || index >= allItems.length) return;
+
         currentIndex = index;
         const item = allItems[currentIndex];
 
         dlgImg.src = item.full;
-        const title = getDisplayTitle(item);
-        dlgImg.alt = title || 'Photo';
-        dlgTitle.textContent = title || 'Untitled';
+        const title = getDisplayTitle(item, true, index);
+        dlgImg.alt = title;
+        dlgTitle.textContent = title;
         dlgMeta.innerHTML = renderMetadata(item);
 
         // Update nav buttons
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex === allItems.length - 1;
 
+        // Announce to screen readers
+        const position = `Photo ${currentIndex + 1} of ${allItems.length}`;
+        dlgStatus.textContent = `${position}. ${title}`;
+
+        // Store last focused element and open dialog
+        lastFocusedElement = document.activeElement;
         dlg.showModal();
+
+        // Preload adjacent images for faster navigation
+        preloadAdjacentImages(index);
+
+        // Set focus to close button after opening
+        setTimeout(() => closeBtn.focus(), FOCUS_DELAY_MS);
+      }
+
+      // Close lightbox
+      function closeLightbox() {
+        dlg.close();
+        // Restore focus to the element that opened the dialog
+        if (lastFocusedElement) {
+          lastFocusedElement.focus();
+          lastFocusedElement = null;
+        }
       }
 
       // Navigate lightbox
       function navigateLightbox(direction) {
+        if (!allItems || allItems.length === 0) return;
+
         const newIndex = currentIndex + direction;
         if (newIndex >= 0 && newIndex < allItems.length) {
           openLightbox(newIndex);
         }
       }
 
+      // Debounced navigation for keyboard
+      function debouncedNavigate(direction) {
+        if (navigationDebounceTimer) return;
+
+        navigateLightbox(direction);
+        navigationDebounceTimer = setTimeout(() => {
+          navigationDebounceTimer = null;
+        }, NAVIGATION_DEBOUNCE_MS);
+      }
+
+      // Debounced jump for Home/End keys
+      function debouncedJump(index) {
+        if (navigationDebounceTimer) return;
+
+        openLightbox(index);
+        navigationDebounceTimer = setTimeout(() => {
+          navigationDebounceTimer = null;
+        }, NAVIGATION_DEBOUNCE_MS);
+      }
+
       // Load photos
       async function load() {
         try {
           loader.style.display = 'block';
-          const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
-          if (!res.ok) throw new Error('manifest fetch failed');
-          const { items = [] } = await res.json();
+          // Use default caching but add cache-busting timestamp for manifest updates
+          const manifestUrl = `${MANIFEST_URL}?t=${Math.floor(Date.now() / CACHE_DURATION_MS)}`;
+          const res = await fetch(manifestUrl);
 
-          allItems = items;
+          if (!res.ok) {
+            const errorMsg = `Failed to load photos (HTTP ${res.status})`;
+            throw new Error(errorMsg);
+          }
+
+          const data = await res.json();
+          if (!data || !Array.isArray(data.items)) {
+            throw new Error('Invalid manifest format');
+          }
+
+          allItems = data.items;
 
           loader.style.display = 'none';
           renderGrid();
         } catch (e) {
           loader.style.display = 'none';
-          empty.style.display = 'block';
-          empty.textContent = 'Could not load photos.';
-          console.error(e);
+          empty.classList.add('visible');
+
+          // Provide more helpful error messages
+          if (e.name === 'TypeError' && e.message.includes('fetch')) {
+            empty.textContent = 'Network error. Please check your connection.';
+          } else if (e.message.includes('HTTP')) {
+            empty.textContent = e.message;
+          } else if (e.message.includes('Invalid manifest')) {
+            empty.textContent = 'Photo data is corrupted. Please try again later.';
+          } else {
+            empty.textContent = 'Could not load photos. Please try again.';
+          }
+
+          console.error('Photo loading error:', e);
         }
       }
 
@@ -499,24 +409,48 @@ const YEAR = new Date().getFullYear();
         const card = e.target.closest('.card');
         if (!card) return;
         const index = parseInt(card.dataset.index, 10);
-        openLightbox(index);
+        if (!isNaN(index)) {
+          openLightbox(index);
+        }
       });
 
-      closeBtn.addEventListener('click', () => dlg.close());
+      closeBtn.addEventListener('click', closeLightbox);
       prevBtn.addEventListener('click', () => navigateLightbox(-1));
       nextBtn.addEventListener('click', () => navigateLightbox(1));
 
-      // Keyboard navigation
+      // Keyboard navigation and focus trap
       document.addEventListener('keydown', e => {
         if (!dlg.open) return;
-        if (e.key === 'Escape') dlg.close();
-        if (e.key === 'ArrowLeft') navigateLightbox(-1);
-        if (e.key === 'ArrowRight') navigateLightbox(1);
+
+        // Handle keyboard navigation
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeLightbox();
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          debouncedNavigate(-1);
+        }
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          debouncedNavigate(1);
+        }
+        if (e.key === 'Home') {
+          e.preventDefault();
+          debouncedJump(0);
+        }
+        if (e.key === 'End') {
+          e.preventDefault();
+          debouncedJump(allItems.length - 1);
+        }
+
+        // Trap focus inside dialog
+        trapFocus(e);
       });
 
       // Click backdrop to close
       dlg.addEventListener('click', e => {
-        if (e.target === dlg) dlg.close();
+        if (e.target === dlg) closeLightbox();
       });
 
       // Load on page load
