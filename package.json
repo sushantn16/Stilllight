@@ -7,7 +7,12 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run test:e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report",
     "build:images": "node tools/build-manifest.mjs",
     "upload:r2": "node tools/upload-to-r2.mjs",
     "watch:images": "node tools/watch.mjs",
@@ -32,6 +37,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.922.0",
     "@aws-sdk/s3-request-presigner": "^3.922.0",
+    "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.2",
     "astro": "^5.15.3",
     "chokidar": "^4.0.3",
