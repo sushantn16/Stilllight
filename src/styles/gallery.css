@@ -260,6 +260,7 @@ dialog::backdrop{background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
   z-index:10;
   display:flex;
   gap:8px;
+  margin:auto;
 }
 .dlg-btn{
   border:0;
