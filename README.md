@@ -109,23 +109,6 @@ npm run deploy
 ## 📚 Documentation
 
 - 📖 [**Architecture Guide**](docs/architecture.md) - Detailed technical documentation
-- 🚀 [**Deployment Guide**](docs/deployment.md) - Step-by-step setup instructions
-- 🔧 [**Configuration Reference**](docs/configuration.md) - All available options
-- 🐛 [**Troubleshooting**](docs/troubleshooting.md) - Common issues and solutions
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Astro](https://astro.build/) - Static site framework
-- [Cloudflare R2](https://developers.cloudflare.com/r2/) - Object storage
-- [Sharp](https://sharp.pixelplumbing.com/) - Image processing
 
 ---
 
