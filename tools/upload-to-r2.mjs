@@ -1,8 +1,9 @@
 // tools/upload-to-r2.mjs
 import { readdir, stat, readFile } from "fs/promises";
 import path from "path";
+import crypto from "crypto";
 import "dotenv/config";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({
   region: "auto",
@@ -16,6 +17,33 @@ const s3 = new S3Client({
 
 const BUCKET = process.env.R2_BUCKET;
 const PUBLIC_DIR = "public";
+
+// Calculate MD5 hash for a file (to match S3 ETag)
+function getMd5Hash(buffer) {
+  return crypto.createHash('md5').update(buffer).digest('hex');
+}
+
+// Check if file exists in R2 and matches local file
+async function shouldUpload(key, localBuffer) {
+  try {
+    const response = await s3.send(
+      new HeadObjectCommand({
+        Bucket: BUCKET,
+        Key: key,
+      })
+    );
+
+    // Get ETag without quotes
+    const remoteETag = response.ETag?.replace(/"/g, '');
+    const localMd5 = getMd5Hash(localBuffer);
+
+    // If ETags match, file hasn't changed
+    return remoteETag !== localMd5;
+  } catch (error) {
+    // File doesn't exist, need to upload
+    return true;
+  }
+}
 
 async function walk(dir, base = dir, out = []) {
   for (const name of await readdir(dir)) {
@@ -47,21 +75,33 @@ function contentType(key) {
 
 const files = await walk(PUBLIC_DIR);
 
+let uploadedCount = 0;
+let skippedCount = 0;
+
 for (const f of files) {
   const Body = await readFile(f.abs);
   const Key = f.rel; // e.g. thumb/abc.jpg, full/abc.jpg, manifest.json
 
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: BUCKET,
-      Key,
-      Body,
-      ContentType: contentType(Key),
-      ...cacheHeaders(Key),
-    })
-  );
+  // Check if we need to upload
+  const needsUpload = await shouldUpload(Key, Body);
 
-  console.log("Uploaded:", Key);
+  if (needsUpload) {
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key,
+        Body,
+        ContentType: contentType(Key),
+        ...cacheHeaders(Key),
+      })
+    );
+
+    console.log("✅ Uploaded:", Key);
+    uploadedCount++;
+  } else {
+    console.log("⏭️  Skipped (unchanged):", Key);
+    skippedCount++;
+  }
 }
 
-console.log("✅ Upload complete.");
+console.log(`\n✅ Upload complete: ${uploadedCount} uploaded, ${skippedCount} skipped`);

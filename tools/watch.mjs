@@ -20,13 +20,14 @@ let queued = false;
 async function run([cmd, args]) {
   const full = [cmd, ...args].join(" ");
   console.log(`⚙️  Running: ${full}`);
-  const child = execFile(cmd, args, { stdio: "inherit" });
-  const { stdout, stderr } = await child.catch(e => {
-    console.error(e);
-    return { stdout: "", stderr: e.message };
-  });
-  if (stdout) console.log(stdout);
-  if (stderr) console.error(stderr);
+  try {
+    const { stdout, stderr } = await exec(cmd, args);
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+  } catch (e) {
+    console.error(`❌ Command failed: ${e.message}`);
+    throw e;
+  }
 }
 
 /**

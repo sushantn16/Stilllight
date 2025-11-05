@@ -9,6 +9,9 @@ import '../styles/gallery.css';
     <title>Stilllight</title>
     <meta name="description" content="A fast, minimal photo gallery." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Performance: Preconnect to R2 CDN for faster image loading -->
+    <link rel="preconnect" href="https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev" crossorigin />
+    <link rel="dns-prefetch" href="https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev" />
   </head>
   <body>
     <header>
@@ -238,8 +241,17 @@ import '../styles/gallery.css';
           card.className = 'card';
           card.setAttribute('role', 'listitem');
           card.dataset.index = idx;
+
+          // First 6 images: eager loading + fetchpriority for first image
+          // Rest: lazy loading for performance
+          const isFirstImage = idx === 0;
+          const isAboveFold = idx < 6;
+          const loadingAttr = isAboveFold ? 'eager' : 'lazy';
+          const fetchPriorityAttr = isFirstImage ? ' fetchpriority="high"' : '';
+          const decodingAttr = isAboveFold ? ' decoding="async"' : '';
+
           card.innerHTML = `
-            <img loading="lazy" src="${escapeHtml(item.thumb)}"
+            <img loading="${loadingAttr}"${fetchPriorityAttr}${decodingAttr} src="${escapeHtml(item.thumb)}"
                  srcset="${escapeHtml(item.thumb)} 480w, ${escapeHtml(item.full)} 1600w"
                  sizes="(max-width: 600px) 100vw, 300px"
                  alt="${safeAlt}">
