@@ -338,3 +338,8 @@ footer{
   white-space:nowrap;
   border-width:0;
 }
+
+footer a{
+  color:inherit;
+  text-underline-offset:.2em;
+}

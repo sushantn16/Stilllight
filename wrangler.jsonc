@@ -1,0 +1,10 @@
+// Cloudflare Workers, static assets only: no Worker code runs. Serves photos.iamsushant.dev.
+// Workers Builds runs `npm run build` and then `npx wrangler deploy` on every push to main.
+// Outside GitHub Actions the Astro base is "/", so this build serves from the domain root.
+{
+  "name": "stilllight",
+  "compatibility_date": "2026-10-19",
+  "assets": {
+    "directory": "./dist"
+  }
+}
