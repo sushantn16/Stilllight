@@ -1,10 +1,11 @@
-// Cloudflare Workers, static assets only: no Worker code runs. Serves photos.iamsushant.dev.
+// Cloudflare Workers, static assets only: no Worker code runs. Serves iamsushant.dev/photos* (a route),
+// and photos.iamsushant.dev, which only redirects there.
 // Workers Builds runs `npm run build` and then `npx wrangler deploy` on every push to main.
-// Outside GitHub Actions the Astro base is "/", so this build serves from the domain root.
+// The build writes to site/photos/ so asset paths match the /photos/ URL prefix.
 {
   "name": "stilllight",
   "compatibility_date": "2026-10-19",
   "assets": {
-    "directory": "./dist"
+    "directory": "./site"
   }
 }

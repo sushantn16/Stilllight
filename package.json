@@ -20,7 +20,8 @@
     "prebuild": "npm run build:images",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "postbuild": "node tools/cloudflare-assets.mjs"
   },
   "repository": {
     "type": "git",

@@ -1,30 +1,39 @@
 ---
+import { Font } from 'astro:assets';
 import '../styles/gallery.css';
+
+// The Cloudflare build lives at iamsushant.dev/photos/. The GitHub Pages build only redirects there.
+const onGitHubPages = !import.meta.env.BASE_URL.startsWith('/photos');
+const home = 'https://iamsushant.dev/';
+const canonical = 'https://iamsushant.dev/photos/';
+const title = 'Stilllight · Photos by Sushant Nandwani';
+const description = 'Architecture and street photography by Sushant Nandwani, mostly shot on a pocket-sized Sony RX100 VII.';
+const ogImage = 'https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev/full/1df73db8-816c-4faa-a63a-ce6e151120bc_1_105_c.jpg';
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Stilllight - Photo Gallery</title>
-    <meta name="description" content="A minimal photo gallery showcasing moments and memories through photography." />
+    {onGitHubPages && <meta http-equiv="refresh" content={`0; url=${canonical}`} />}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f5f0" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151412" />
+    <!-- Root-relative on purpose: on iamsushant.dev this is the portfolio's icon. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- The GitHub Pages copy and this one serve the same page; search engines should index this one. -->
-    <link rel="canonical" href="https://photos.iamsushant.dev/" />
+    <link rel="canonical" href={canonical} />
+    <Font cssVariable="--font-instrument" preload />
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-geist-mono" />
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://photos.iamsushant.dev/" />
-    <meta property="og:title" content="Stilllight - Photo Gallery" />
-    <meta property="og:description" content="A minimal photo gallery showcasing moments and memories through photography." />
-    <meta property="og:image" content="https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev/full/1df73db8-816c-4faa-a63a-ce6e151120bc_1_105_c.jpg" />
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://photos.iamsushant.dev/" />
-    <meta property="twitter:title" content="Stilllight - Photo Gallery" />
-    <meta property="twitter:description" content="A minimal photo gallery showcasing moments and memories through photography." />
-    <meta property="twitter:image" content="https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev/full/1df73db8-816c-4faa-a63a-ce6e151120bc_1_105_c.jpg" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Performance: Preconnect to R2 CDN for faster image loading -->
     <link rel="preconnect" href="https://pub-a92fe7c6ece0458c914ad88d5101a063.r2.dev" crossorigin />
@@ -33,16 +42,27 @@ import '../styles/gallery.css';
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cbc08d848343432091433a18b2ea4a8a"}'></script><!-- End Cloudflare Web Analytics -->
   </head>
   <body>
-    <header>
-      <div class="header-content">
-        <div class="header-text">
-          <h1>Stilllight</h1>
-          <p>Capturing moments, preserving memories</p>
-        </div>
-      </div>
+    <!-- Shared with iamsushant.dev: same markup, same view-transition names, so it stays put between the two.
+         Root-relative links keep navigation on the same site, which the page transition needs. -->
+    <header class="site-bar">
+      <a class="site-name" href="/">Sushant Nandwani</a>
+      <nav aria-label="Site">
+        <a href="/">About</a>
+        <a href="/#writing">Writing</a>
+        <a href="/photos/" aria-current="page">Photos<span class="nav-indicator" aria-hidden="true"></span></a>
+      </nav>
     </header>
 
-    <div class="photo-count" id="photo-count" role="status" aria-live="polite"></div>
+    <header class="intro">
+      <p class="eyebrow">
+        <span class="dot" aria-hidden="true"></span>Photography<span id="photo-count" role="status" aria-live="polite"></span>
+      </p>
+      <h1 class="title">Stilllight</h1>
+      <p class="lede">
+        Buildings and streets, mostly shot on a pocket-sized Sony RX100 VII. The gallery publishes itself: drop a photo
+        in a folder and it shows up here.
+      </p>
+    </header>
 
     <main id="app" aria-busy="true">
       <div class="loader" id="loader" role="status" aria-live="polite">
@@ -73,7 +93,10 @@ import '../styles/gallery.css';
       <div class="sr-only" id="dlg-status" role="status" aria-live="polite" aria-atomic="true"></div>
     </dialog>
 
-    <footer>Stilllight · by <a href="https://iamsushant.dev">Sushant Nandwani</a></footer>
+    <footer>
+      <span>© {new Date().getFullYear()} Sushant Nandwani</span>
+      <span>Published by Stilllight, a gallery that updates itself · <a href={home}>iamsushant.dev</a></span>
+    </footer>
 
     <script is:inline>
       // Configuration constants
